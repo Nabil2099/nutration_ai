@@ -1,26 +1,48 @@
-# Implementation notes
+# Phase 2 implementation report
 
-## Ownership and decisions
+## Current status
 
-Only startup/onboarding/auth/Home and necessary shared infrastructure were implemented. The explicit architecture decisions in `Agentic/docs/01_ARCHITECTURE.md` and the team contract take precedence over the pasted generic repository-pattern suggestion: services and injected SDK clients are used throughout.
+Android and Web use `nutration-ai-36e01` through real generated FlutterFire configuration. Android package remains `com.example.nutration_ai`. Authentication Email/Password is enabled; the default Firestore database is available in `nam5`.
 
-Screenshots were inspected. The approved palette from document 10, bundled Plus Jakarta Sans, rounded white cards, mint fields, leaf branding, calorie ring, seven-day chart and macro rows are implemented. Unsupported mockup claims (clinical security, biometric login, photo scanning, adaptive targeting, fabricated streaks and AI recommendations) are omitted. Onboarding uses a local vector food illustration and one introduction; the docs do not specify a slide count. No claim of pixel-perfect reproduction is made.
+The four owned features are implemented: Splash startup gate, locally persisted Onboarding, email/password Authentication, and reactive Home Dashboard. Meals, Analytics, AI Coach and Profile screens remain teammate-owned integrations. Home shows a disconnected state until the real meal stream is supplied.
 
-## Important files
+## Findings and fixes
 
-- `lib/main.dart`, `lib/core/firebase_bootstrap.dart`, `tool/connect_firebase.dart`: recoverable initialization and real configuration connection.
-- `lib/app.dart`, `lib/app/app_gate.dart`, `lib/app/cubit/`: injected dependencies and session lifecycle.
-- `lib/features/splash/`, `lib/features/onboarding/`, `lib/features/auth/`, `lib/features/home/`: owned features.
-- `lib/core/data/`: shared profile/goals/meal read contracts and transactional profile service.
-- `lib/core/navigation/`: shell, stable destination enum, teammate screen registration.
-- `lib/core/theme/`, `assets/fonts/`: approved design tokens and bundled font.
-- `test/`: isolated service/Cubit/calculation and widget/navigation tests.
-- `android/app/src/main/AndroidManifest.xml`: release Internet permission and app label.
+- Bootstrap had no generated options and rejected Web. Registered Android/Web clients with the explicitly authorized project and connected `lib/core/firebase_bootstrap.dart` to generated options. Services are constructed after initialization.
+- HomeCubit could hide a meal-stream failure on the next profile emission and reuse stale totals. Invalidated both cached inputs on failure and added a regression test.
+- Phase 2 palette values applied to background, primary and main text.
+- Added sensitive-local-file exclusions to `.gitignore` while preserving public Firebase client configuration.
+- Added `flutter_launcher_icons` and generated Android/Web icons from an exact tracked copy of the provided artwork.
+- Existing feature-first Cubits, injected services, Hive preferences and teammate boundaries preserved. No repository layer or teammate module was added.
 
-## Remaining external work
+## Files created or modified for Phase 2 and icons
 
-Real Firebase project configuration, Console Email/Password setup, Firestore creation, reviewed rules deployment and two-account/emulator verification remain required. The existing example rules were preserved. Optional Storage was not configured. No live authentication or database operation is claimed to have been tested.
+Created: `lib/firebase_options.dart`, `android/app/google-services.json`, `firebase.json`, `flutter_launcher_icons.yaml`, `assets/icons/app_icon.png`, `test/firebase_rules/live_check.mjs`.
 
-The Meals owner's service and Analytics/Coach/Profile/Add Meal screens have not been supplied. The callback and widget-builder integration points are ready; placeholders identify missing modules. UI tests use test-only data. Production Home never presents test fixtures as logged nutrition.
+Modified: `lib/core/firebase_bootstrap.dart`, `lib/features/home/presentation/cubit/home_cubit.dart`, `lib/core/theme/app_colors.dart`, `test/home_cubit_test.dart`, Android Gradle plugin configuration, `.gitignore`, `pubspec.yaml`, `pubspec.lock`, Android launcher PNGs, Web favicon/icons/manifest, README and this report. Pre-existing user changes were preserved. No source files were deleted as part of these tasks.
 
-The workspace has no Git repository metadata, so branch/diff/commit checks are unavailable. No commits were made.
+## Verified results
+
+- Baseline: 26 Flutter tests passed.
+- Updated analyzer: no issues; 27 Flutter tests passed.
+- Firestore emulator: five tests passed against local owner-only rules, including cross-account denial and invalid writes.
+- Flutter Web debug build: passed after Firebase configuration.
+- Launcher generator: succeeded for Android and Web.
+- Live Firebase: two explicitly approved temporary accounts passed registration, display-name update, server profile creation, goal update, idempotent profile initialization, preservation of creation timestamp, logout and login. Distinct UID profile paths verified. Both accounts and profiles were deleted successfully.
+- Android device smoke check: installed the final debug APK on the approved 2201117TG (Android 13); cold startup, onboarding completion, login validation, Sign Up navigation and onboarding persistence across force-stop/relaunch passed. Left the app on Login. Authenticated native restart remains unverified.
+- Live checks used the Firebase JavaScript SDK and the generated Web configuration. They do not prove the Flutter UI works on a device or native session restoration after process restart.
+- Final Android debug build: succeeded with generated Firebase configuration and the supplied launcher icon. Artifact: `build/app/outputs/flutter-apk/app-debug.apk`. Corrupt Gradle transform metadata was moved aside for regeneration before this successful build. FlutterFire Kotlin-plugin migration warnings remain non-fatal.
+
+## Rules and security
+
+Deployed Firestore rules are Console test-mode rules allowing access until December 15, 2026. The user explicitly requested leaving them unchanged. No live access-isolation claim is made; the tested local owner-only rules are not deployed. No rules deployment occurred.
+
+Credential-signature scan of application/tests/tools/rules found no private-key or refresh-token signatures. Earlier Firebase CLI account JSON exposed credential fields in conversation history; values were not copied into application source or reports. Revoke the old CLI authorization from Google Account connections and reauthenticate if needed. Public Firebase client identifiers are retained. Live test credentials remain only in process memory.
+
+## Remaining work
+
+1. Run the Flutter UI on target devices to confirm signup/login, keyboard behavior and restored sessions after restart.
+2. Integrate the Meals owner's stream and Analytics/Coach/Profile/Add Meal builders; no mock nutrition is presented as live data.
+3. Configure release signing when preparing a release. Review deployed rules before private or production use; they remain unchanged per user instruction.
+
+Storage is optional and not used by the owned features. No Storage readiness claim is made.

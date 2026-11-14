@@ -12,11 +12,11 @@ The app uses bundled Plus Jakarta Sans (license in `assets/fonts/OFL.txt`). Onbo
 
 Android and Web are registered with **`nutration-ai-36e01`**. Generated `lib/firebase_options.dart`, `android/app/google-services.json`, and `firebase.json` target that project. Android retains `com.example.nutration_ai`. Bootstrap initializes Firebase once before constructing services. Client configuration contains public identifiers, not admin credentials.
 
-Live checks found two required Console steps:
+Live checks confirm Email/Password Authentication is enabled and the default Firestore database exists in `nam5`. Two approved temporary accounts passed signup, identity update, server profile creation, goal persistence across repeated initialization, logout and login; both accounts and documents were deleted afterward. These were Firebase JavaScript SDK checks using the generated Web client configuration, not a Flutter device UI test.
 
-1. In Firebase Console → Authentication → Get started, enable **Email/Password**. The live sign-in endpoint currently returns `CONFIGURATION_NOT_FOUND`.
-2. In Firestore Database → Create database, choose the team's region and production mode. The Firestore API currently returns HTTP 403 because it is disabled or unused. After database creation, review `firebase/firestore.rules` and approve deployment before running `firebase deploy --only firestore:rules --project nutration-ai-36e01` with an appropriate deployment configuration. No production rules have been deployed.
-3. Then verify signup/profile creation, login, restart/session restoration and logout using two test accounts. Align the server password policy with the UI minimum of eight characters and one number.
+The deployed rules are Console test-mode rules allowing reads/writes until December 15, 2026. They remain unchanged at the user's request. The owner-only rules in `firebase/` pass emulator tests but are not deployed; live access isolation is therefore not claimed.
+
+Flutter device UI verification of session restoration remains outstanding. Meal data and teammate-owned destinations remain integration dependencies.
 
 ```sh
 flutter pub get
@@ -89,3 +89,17 @@ flutter test tool/render_previews.dart
 ```
 
 This utility writes the five screen images into `docs/previews/`. Home uses an explicitly test-only fixture and the images are review artifacts, not live account screenshots.
+
+### Launcher icons
+
+`flutter_launcher_icons.yaml` generates Android and Web icons from `assets/icons/app_icon.png`, an exact copy of `Agentic/UI/app_icon.png`. Regenerate with `dart run flutter_launcher_icons`; rebuild/reinstall to refresh the Android launcher icon.
+
+### Approved live smoke test
+
+`test/firebase_rules/live_check.mjs` creates two temporary accounts and profile documents, verifies live Auth/profile operations, and cleans them up. Run only with explicit permission to create test data:
+
+```sh
+NUTRITION_LIVE_TEST=approved node test/firebase_rules/live_check.mjs
+```
+
+It never prints passwords or tokens and does not test deployed access isolation or Flutter device session restoration.
