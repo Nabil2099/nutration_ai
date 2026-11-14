@@ -98,4 +98,27 @@ void main() {
     expect(cubit.state.status, HomeStatus.loaded);
     await cubit.close();
   });
+  test('meal failure cannot be hidden by a later profile update', () async {
+    final profiles = MockProfiles();
+    final p = StreamController<UserProfile>.broadcast();
+    final m = StreamController<List<MealEntry>>.broadcast();
+    when(() => profiles.watchProfile(any())).thenAnswer((_) => p.stream);
+    final cubit = HomeCubit(profiles, (_, first, last) => m.stream);
+    await cubit.start('a');
+    p.add(profile());
+    m.add([]);
+    await settle();
+    expect(cubit.state.status, HomeStatus.loaded);
+    m.addError(StateError('permission denied'));
+    await settle();
+    p.add(profile());
+    await settle();
+    expect(cubit.state.status, HomeStatus.error);
+    m.add([]);
+    await settle();
+    expect(cubit.state.status, HomeStatus.loaded);
+    await cubit.close();
+    await p.close();
+    await m.close();
+  });
 }

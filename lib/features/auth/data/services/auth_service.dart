@@ -25,7 +25,9 @@ class AuthService {
     required String password,
     required String name,
   }) {
+    if (registration != null) return registration!;
     final completion = Completer<void>();
+    var accountCreated = false;
     registration = completion.future;
     // Attach an error handler even if the auth stream has not emitted yet.
     unawaited(completion.future.catchError((Object _) {}));
@@ -36,6 +38,7 @@ class AuthService {
           email: email.trim(),
           password: password,
         );
+        accountCreated = true;
         await result.user!.updateDisplayName(name.trim());
         await profiles.ensureProfile(
           uid: result.user!.uid,
@@ -46,6 +49,7 @@ class AuthService {
         _pendingName = null;
         completion.complete();
       } catch (error, stack) {
+        if (!accountCreated) _pendingName = null;
         completion.completeError(error, stack);
       } finally {
         registration = null;

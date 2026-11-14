@@ -33,7 +33,11 @@ abstract final class AppTheme {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(48, 52),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
     cardTheme: CardThemeData(

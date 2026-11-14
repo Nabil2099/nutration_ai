@@ -50,7 +50,7 @@ class DailyCaloriesChart extends StatelessWidget {
                               day.calories == null
                                   ? '—'
                                   : '${day.calories!.round()}',
-                              style: const TextStyle(fontSize: 10),
+                              style: const TextStyle(fontSize: 12),
                             ),
                             const SizedBox(height: 6),
                             Container(

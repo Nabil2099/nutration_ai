@@ -56,11 +56,7 @@ class AppGate extends StatelessWidget {
             key: ValueKey(state.profile!.uid),
             create: (_) =>
                 HomeCubit(profiles, mealReader)..start(state.profile!.uid),
-            child: Navigator(
-              onGenerateRoute: (_) => MaterialPageRoute<void>(
-                builder: (_) => MainShell(screens: screens),
-              ),
-            ),
+            child: _SessionNavigator(screens: screens),
           );
       }
     },
@@ -89,5 +85,26 @@ class _AuthFlowState extends State<_AuthFlow> {
     child: _register
         ? SignUpScreen(onSwitch: _switch)
         : LoginScreen(onSwitch: _switch),
+  );
+}
+
+class _SessionNavigator extends StatefulWidget {
+  const _SessionNavigator({required this.screens});
+  final TeamScreens screens;
+  @override
+  State<_SessionNavigator> createState() => _SessionNavigatorState();
+}
+
+class _SessionNavigatorState extends State<_SessionNavigator> {
+  final _navigator = GlobalKey<NavigatorState>();
+  @override
+  Widget build(BuildContext context) => NavigatorPopHandler<void>(
+    onPopWithResult: (_) => _navigator.currentState!.pop(),
+    child: Navigator(
+      key: _navigator,
+      onGenerateRoute: (_) => MaterialPageRoute<void>(
+        builder: (_) => MainShell(screens: widget.screens),
+      ),
+    ),
   );
 }

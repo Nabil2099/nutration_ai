@@ -38,6 +38,8 @@ class HomeCubit extends Cubit<HomeState> {
     if (isClosed || gen != _generation) return;
     final today = clock();
     void fail(Object _) {
+      _profile = null;
+      _meals = null;
       if (!isClosed && gen == _generation) {
         emit(
           const HomeState(
@@ -98,8 +100,8 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> close() async {
     ++_generation;
     _midnight?.cancel();
-    print('profile cancel'); await _profileSub?.cancel(); print('profile done');
-    print('meal cancel'); await _mealSub?.cancel(); print('meal done');
-    print('super close'); return super.close().then((_) {print('super done');});
+    await _profileSub?.cancel();
+    await _mealSub?.cancel();
+    return super.close();
   }
 }

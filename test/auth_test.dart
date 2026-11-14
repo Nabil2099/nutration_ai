@@ -95,4 +95,27 @@ void main() {
     expect(service.registration, null);
     expect(service.pendingName, null);
   });
+  test(
+    'failed account creation cannot rename an existing account on later login',
+    () async {
+      final sdk = MockFirebaseAuth(), profiles = MockProfiles();
+      when(
+        () => sdk.createUserWithEmailAndPassword(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
+      final service = AuthService(sdk, profiles);
+      await expectLater(
+        service.register(
+          email: 'existing@example.com',
+          password: 'password1',
+          name: 'Wrong Name',
+        ),
+        throwsA(isA<FirebaseAuthException>()),
+      );
+      expect(service.pendingName, null);
+      verifyNever(() => profiles.saveRegisteredName(any(), any()));
+    },
+  );
 }

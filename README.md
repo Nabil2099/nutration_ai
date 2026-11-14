@@ -8,26 +8,25 @@ Flutter Material 3 implementation of **Splash, Onboarding, Login / Sign Up, and 
 
 The app uses bundled Plus Jakarta Sans (license in `assets/fonts/OFL.txt`). Onboarding is a single scrollable introduction, as the spec does not prescribe multiple slides. It persists only its completion preference in Hive. Auth sessions belong to Firebase.
 
-## Firebase setup required
+## Firebase project configuration
 
-No Firebase project or client configuration was supplied. Until configured, startup shows a recoverable setup error rather than a simulated session.
+Android and Web are registered with **`nutration-ai-36e01`**. Generated `lib/firebase_options.dart`, `android/app/google-services.json`, and `firebase.json` target that project. Android retains `com.example.nutration_ai`. Bootstrap initializes Firebase once before constructing services. Client configuration contains public identifiers, not admin credentials.
 
-1. Select the team's Firebase project, register the intended Android/Web apps, and enable Email/Password Authentication. The starter Android application ID is `com.example.nutration_ai`; agree the final ID before registering.
-2. Create Cloud Firestore in the agreed region. Review and emulator-test the owner-only examples in `Agentic/firebase/` before deploying them. They have **not** been deployed by this implementation.
-3. Install the Firebase and FlutterFire CLIs, authenticate, and run from this project root:
+Live checks found two required Console steps:
 
-   ```sh
-   flutter pub get
-   flutterfire configure
-   dart run tool/connect_firebase.dart
-   dart format lib/core/firebase_bootstrap.dart
-   flutter run
-   ```
+1. In Firebase Console → Authentication → Get started, enable **Email/Password**. The live sign-in endpoint currently returns `CONFIGURATION_NOT_FOUND`.
+2. In Firestore Database → Create database, choose the team's region and production mode. The Firestore API currently returns HTTP 403 because it is disabled or unused. After database creation, review `firebase/firestore.rules` and approve deployment before running `firebase deploy --only firestore:rules --project nutration-ai-36e01` with an appropriate deployment configuration. No production rules have been deployed.
+3. Then verify signup/profile creation, login, restart/session restoration and logout using two test accounts. Align the server password policy with the UI minimum of eight characters and one number.
 
-   The helper connects bootstrap to the real generated `firebase_options.dart`. It refuses to run without that file. No generated options or project IDs are invented. Native Android initialization can also use the real platform config produced by FlutterFire.
-4. Verify registration, restored sessions, sign-out, and account isolation with two test accounts. Align the Firebase password policy with the UI minimum of 8 characters and a number; stricter server-policy errors are handled.
+```sh
+flutter pub get
+flutter run -d chrome
+flutter run -d <android-device-id>
+```
 
-Storage is optional and has not been added. There are no AI credentials or extra auth providers. Native iOS/macOS scaffolding is not present in the supplied workspace; add/configure those platforms separately if needed. Linux is not a supported Firebase Auth target here; use Android or configured Web.
+To regenerate configuration: `flutterfire configure --project=nutration-ai-36e01 --platforms=android,web --android-package-name=com.example.nutration_ai`.
+
+Storage remains optional and unconfigured. iOS/macOS scaffolding is absent; Linux Firebase Auth is unsupported here. Meal and teammate screen integration remains as described below.
 
 ## Team integration
 
@@ -71,3 +70,22 @@ flutter build apk --debug
 ```
 
 Tests use mocks and an in-memory Firestore fake for startup/auth ordering, goal persistence, nutrition calculations, live streams, account changes, day boundaries, forms, responsive layouts, onboarding persistence, and shell navigation. They do not replace real Firebase integration or Emulator Security Rules tests. See [IMPLEMENTATION.md](IMPLEMENTATION.md) for actual verification results and remaining dependencies.
+
+### Local Firestore rules checks
+
+These tests run only against the explicit `demo-nutrition-ai` emulator namespace. They do not configure or deploy a production project.
+
+```sh
+npm ci --prefix test/firebase_rules
+firebase emulators:exec --project demo-nutrition-ai --config firebase.emulators.json --only firestore 'npm test --prefix test/firebase_rules'
+```
+
+A Java 21+ runtime must be on PATH. This machine uses `/opt/android-studio/jbr/bin`. The test package overrides the Firebase SDK's older gRPC dependency with a patched compatible release; `npm audit` is clean.
+
+### Render previews
+
+```sh
+flutter test tool/render_previews.dart
+```
+
+This utility writes the five screen images into `docs/previews/`. Home uses an explicitly test-only fixture and the images are review artifacts, not live account screenshots.

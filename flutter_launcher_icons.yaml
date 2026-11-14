@@ -1,0 +1,11 @@
+# Original artwork: Agentic/UI/app_icon.png.
+# Keep a tracked copy because Agentic/ is excluded from version control.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/icons/app_icon.png
+  web:
+    generate: true
+    image_path: assets/icons/app_icon.png
+    background_color: '#F5F8F6'
+    theme_color: '#1E6B4B'

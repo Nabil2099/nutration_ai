@@ -33,7 +33,12 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Home Dashboard'),
+      title: Text(switch (_selected) {
+        MainDestination.home => 'Home Dashboard',
+        MainDestination.analytics => 'Analytics',
+        MainDestination.coach => 'AI Coach',
+        MainDestination.profile => 'Profile',
+      }),
       actions: [
         IconButton(
           onPressed: () => context.read<AppCubit>().signOut(),
@@ -130,7 +135,7 @@ class _MainShellState extends State<MainShell> {
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 10),
+                style: const TextStyle(fontSize: 12),
               ),
             ],
           ),

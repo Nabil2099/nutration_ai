@@ -49,3 +49,17 @@ app.*.map.json
 
 
 /Agentic/
+
+# Local credentials (Firebase client config is intentionally allowed)
+.env
+.env.*
+!.env.example
+*service-account*.json
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+*.pem
+*.p12
+*.jks
+*.keystore
+android/key.properties
+android/.kotlin/

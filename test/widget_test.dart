@@ -81,9 +81,7 @@ void main() {
         ),
       );
       await tester.pumpWidget(const SizedBox());
-      final closing = cubit.close();
-      for (var i = 0; i < 10; i++) { await tester.pump(); }
-      await closing;
+      await tester.runAsync(cubit.close);
     },
   );
 
@@ -137,9 +135,7 @@ void main() {
       await tester.ensureVisible(find.text('Get Started →'));
       expect(tester.takeException(), null);
       await tester.pumpWidget(const SizedBox());
-      final closing = cubit.close();
-      for (var i = 0; i < 10; i++) { await tester.pump(); }
-      await closing;
+      await tester.runAsync(cubit.close);
     });
   }
   test('Hive onboarding completion persists across reopen', () async {
@@ -206,7 +202,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Team Add Meal'), findsOneWidget);
       expect(find.text('Analytics'), findsNothing);
-      await tester.pageBack();
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(
         find.textContaining('Analytics integration pending'),
@@ -220,7 +216,7 @@ void main() {
       expect(find.text('Welcome back'), findsOneWidget);
       expect(find.text('Team Add Meal'), findsNothing);
       await tester.pumpWidget(const SizedBox());
-      await sessions.close();
+      await tester.runAsync(sessions.close);
     },
   );
   testWidgets('auth flow switches without stacking root routes', (
@@ -246,6 +242,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Welcome back'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
-    await sessions.close();
+    await tester.runAsync(sessions.close);
   });
 }

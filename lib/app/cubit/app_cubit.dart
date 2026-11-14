@@ -81,6 +81,10 @@ class AppCubit extends Cubit<AppState> {
               email: user.email ?? '',
             );
       if (!isClosed && generation == _generation) {
+        // A restored account has already passed the introduction on another
+        // installation; persist that fact so logout/restart cannot replay it.
+        if (!onboarding.isCompleted) await onboarding.markCompleted();
+        if (isClosed || generation != _generation) return;
         emit(AppState(AppStatus.authenticated, profile: ready));
       }
     } catch (_) {
