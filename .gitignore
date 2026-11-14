@@ -63,3 +63,4 @@ app.*.map.json
 *.keystore
 android/key.properties
 android/.kotlin/
+/firebase/
