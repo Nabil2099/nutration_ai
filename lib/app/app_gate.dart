@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../features/auth/data/services/auth_service.dart';
 import '../features/auth/presentation/cubit/auth_cubit.dart';
+import '../features/auth/presentation/cubit/auth_state.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/sign_up_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
@@ -34,7 +35,7 @@ class AppGate extends StatelessWidget {
       switch (state.status) {
         case AppStatus.checking:
         case AppStatus.preparingUser:
-          return const SplashScreen();
+          return const SplashScreen(animateEntrance: false);
         case AppStatus.needsOnboarding:
           return OnboardingScreen(onComplete: cubit.completeOnboarding);
         case AppStatus.unauthenticated:
@@ -77,15 +78,25 @@ class _AuthFlowState extends State<_AuthFlow> {
   }
 
   @override
-  Widget build(BuildContext context) => PopScope(
-    canPop: !_register,
-    onPopInvokedWithResult: (popped, _) {
-      if (!popped && _register) _switch();
-    },
-    child: _register
-        ? SignUpScreen(onSwitch: _switch)
-        : LoginScreen(onSwitch: _switch),
-  );
+  Widget build(BuildContext context) {
+    final submitting = context.select<AuthCubit, bool>(
+      (cubit) => cubit.state.status == AuthStatus.submitting,
+    );
+    return PopScope(
+      canPop: !_register && !submitting,
+      onPopInvokedWithResult: (popped, _) {
+        if (!popped && _register && !submitting) {
+          _switch();
+        }
+      },
+      child: _register
+          ? SignUpScreen(
+              key: const ValueKey('signup_screen'),
+              onSwitch: _switch,
+            )
+          : LoginScreen(key: const ValueKey('login_screen'), onSwitch: _switch),
+    );
+  }
 }
 
 class _SessionNavigator extends StatefulWidget {

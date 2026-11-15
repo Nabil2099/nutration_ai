@@ -8,20 +8,28 @@ import 'main_destination.dart';
 
 class TeamScreens {
   const TeamScreens({this.analytics, this.coach, this.profile, this.addMeal});
-  final WidgetBuilder? analytics, coach, profile, addMeal;
+
+  final WidgetBuilder? analytics;
+  final WidgetBuilder? coach;
+  final WidgetBuilder? profile;
+  final WidgetBuilder? addMeal;
 }
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key, this.screens = const TeamScreens()});
+
   final TeamScreens screens;
+
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
   MainDestination _selected = MainDestination.home;
+
   void _select(MainDestination destination) =>
       setState(() => _selected = destination);
+
   void _log() => Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder:
@@ -30,20 +38,68 @@ class _MainShellState extends State<MainShell> {
               const IntegrationPlaceholder(name: 'Add Meal', standalone: true),
     ),
   );
+
   @override
   Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.background,
     appBar: AppBar(
-      title: Text(switch (_selected) {
-        MainDestination.home => 'Home Dashboard',
-        MainDestination.analytics => 'Analytics',
-        MainDestination.coach => 'AI Coach',
-        MainDestination.profile => 'Profile',
-      }),
+      backgroundColor: AppColors.background,
+      surfaceTintColor: Colors.transparent,
+      centerTitle: false,
+      titleSpacing: 20,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: AppColors.mintBadge,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.eco_outlined,
+              size: 19,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              switch (_selected) {
+                MainDestination.home => 'Home Dashboard',
+                MainDestination.analytics => 'Analytics',
+                MainDestination.coach => 'AI Coach',
+                MainDestination.profile => 'Profile',
+              },
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
       actions: [
-        IconButton(
-          onPressed: () => context.read<AppCubit>().signOut(),
-          tooltip: 'Sign out',
-          icon: const Icon(Icons.logout),
+        const Icon(
+          Icons.notifications_none_rounded,
+          color: AppColors.textSecondary,
+        ),
+        const SizedBox(width: 8),
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: IconButton(
+            onPressed: () => context.read<AppCubit>().signOut(),
+            tooltip: 'Sign out',
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(36, 36),
+            ),
+            icon: const Icon(Icons.person_outline, size: 18),
+          ),
         ),
       ],
     ),
@@ -66,76 +122,49 @@ class _MainShellState extends State<MainShell> {
     bottomNavigationBar: SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Material(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(36),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                _destination(MainDestination.home, Icons.home_outlined, 'Home'),
-                _destination(
-                  MainDestination.analytics,
-                  Icons.bar_chart_rounded,
-                  'Analytics',
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: IconButton.filled(
-                    onPressed: _log,
-                    tooltip: 'Add Meal',
-                    icon: const Icon(Icons.add, size: 30),
-                    style: IconButton.styleFrom(
-                      minimumSize: const Size(48, 48),
-                    ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(36),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x140A5438),
+                blurRadius: 24,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          child: Row(
+            children: [
+              _destination(MainDestination.home, Icons.home_rounded, 'Home'),
+              _destination(
+                MainDestination.analytics,
+                Icons.bar_chart_rounded,
+                'Analytics',
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: IconButton.filled(
+                  onPressed: _log,
+                  tooltip: 'Add Meal',
+                  icon: const Icon(Icons.add, size: 28),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(50, 50),
                   ),
                 ),
-                _destination(
-                  MainDestination.coach,
-                  Icons.auto_awesome_outlined,
-                  'AI Coach',
-                ),
-                _destination(
-                  MainDestination.profile,
-                  Icons.person_outline,
-                  'Profile',
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-  Widget _destination(
-    MainDestination destination,
-    IconData icon,
-    String label,
-  ) => Expanded(
-    child: Semantics(
-      selected: _selected == destination,
-      button: true,
-      label: label,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(28),
-        onTap: () => _select(destination),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 48),
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          decoration: BoxDecoration(
-            color: _selected == destination
-                ? AppColors.primaryContainer
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: AppColors.primary),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12),
+              ),
+              _destination(
+                MainDestination.coach,
+                Icons.auto_awesome_outlined,
+                'AI Coach',
+              ),
+              _destination(
+                MainDestination.profile,
+                Icons.person_outline,
+                'Profile',
               ),
             ],
           ),
@@ -143,6 +172,55 @@ class _MainShellState extends State<MainShell> {
       ),
     ),
   );
+
+  Widget _destination(
+    MainDestination destination,
+    IconData icon,
+    String label,
+  ) {
+    final selected = _selected == destination;
+    return Expanded(
+      child: Semantics(
+        selected: selected,
+        button: true,
+        label: label,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(28),
+          onTap: () => _select(destination),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 48),
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              color: selected ? AppColors.primaryContainer : Colors.transparent,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: selected
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class IntegrationPlaceholder extends StatelessWidget {
@@ -151,8 +229,10 @@ class IntegrationPlaceholder extends StatelessWidget {
     required this.name,
     this.standalone = false,
   });
+
   final String name;
   final bool standalone;
+
   @override
   Widget build(BuildContext context) {
     final body = Center(

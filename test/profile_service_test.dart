@@ -33,5 +33,17 @@ void main() {
       ),
       throwsArgumentError,
     );
+    final shortName = await actual.ensureProfile(
+      uid: 'short',
+      email: 's@example.com',
+      preferredName: 'A',
+    );
+    expect(shortName.name, 'User');
+    final longName = await actual.ensureProfile(
+      uid: 'long',
+      email: 'l@example.com',
+      preferredName: 'N' * 100,
+    );
+    expect(longName.name.length, 80);
   });
 }

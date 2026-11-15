@@ -118,4 +118,41 @@ void main() {
       verifyNever(() => profiles.saveRegisteredName(any(), any()));
     },
   );
+  test(
+    'partial registration failure preserves pendingName until cleared',
+    () async {
+      final sdk = MockFirebaseAuth(),
+          profiles = MockProfiles(),
+          credential = MockCredential(),
+          u = user();
+      when(
+        () => sdk.createUserWithEmailAndPassword(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => credential);
+      when(() => credential.user).thenReturn(u);
+      when(() => u.updateDisplayName(any())).thenAnswer((_) async {});
+      when(
+        () => profiles.ensureProfile(
+          uid: 'a',
+          email: any(named: 'email'),
+          preferredName: any(named: 'preferredName'),
+        ),
+      ).thenThrow(StateError('offline'));
+      final service = AuthService(sdk, profiles);
+      await expectLater(
+        service.register(
+          email: 'mona@example.com',
+          password: 'password1',
+          name: 'Mona',
+        ),
+        throwsStateError,
+      );
+      expect(service.registration, null);
+      expect(service.pendingName, 'Mona');
+      service.clearPendingName();
+      expect(service.pendingName, null);
+    },
+  );
 }

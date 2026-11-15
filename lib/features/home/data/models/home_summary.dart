@@ -19,10 +19,19 @@ class HomeSummary {
     required this.fatConsumedG,
     required List<DailyCalories> sevenDayTotals,
   }) : sevenDayTotals = List.unmodifiable(sevenDayTotals);
-  final String userName, selectedDayKey;
+  final String userName;
+  final String selectedDayKey;
   final NutritionGoals goals;
+
   double get goalCalories => goals.calories;
-  final double consumedCalories, remainingCalories, progressFraction;
-  final double proteinConsumedG, carbsConsumedG, fatConsumedG;
+  bool get hasLoggedMealsToday =>
+      sevenDayTotals.isNotEmpty && sevenDayTotals.last.calories != null;
+
+  final double consumedCalories;
+  final double remainingCalories;
+  final double progressFraction;
+  final double proteinConsumedG;
+  final double carbsConsumedG;
+  final double fatConsumedG;
   final List<DailyCalories> sevenDayTotals;
 }

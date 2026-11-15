@@ -24,12 +24,19 @@ class HomeCubit extends Cubit<HomeState> {
   List<MealEntry>? _meals;
   String? _uid;
   int _generation = 0;
-  Future<void> start(String uid) async {
+  Future<void> start(String uid, {bool preserveState = false}) async {
     final gen = ++_generation;
+    final canPreserve =
+        preserveState &&
+        _uid == uid &&
+        state.profile != null &&
+        state.status != HomeStatus.error;
     _uid = uid;
-    _profile = null;
-    _meals = null;
-    emit(const HomeState(HomeStatus.loading));
+    if (!canPreserve) {
+      _profile = null;
+      _meals = null;
+      emit(const HomeState(HomeStatus.loading));
+    }
     _midnight?.cancel();
     await Future.wait([
       if (_profileSub != null) _profileSub!.cancel(),
@@ -89,7 +96,9 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> refresh() async {
-    if (_uid != null) await start(_uid!);
+    if (_uid != null) {
+      await start(_uid!, preserveState: true);
+    }
   }
 
   void onAppResumed() {

@@ -102,8 +102,8 @@ void main() {
           .thenAnswer((_) => Stream.value(profile()));
       final cubit = HomeCubit(
         profiles,
-        (_, first, last) => Stream.value([meal(1350)]),
-        clock: () => DateTime(2026, 11, 15),
+        (_, first, last) => Stream.value([meal(2500)]),
+        clock: () => DateTime(2026, 11, 15, 9),
       );
       await cubit.start('a');
       await tester.pumpWidget(
@@ -123,7 +123,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('650'), findsOneWidget);
+      expect(find.text('500'), findsOneWidget);
+      expect(find.text('OVER GOAL'), findsOneWidget);
+      expect(find.text('Good morning, Mona'), findsOneWidget);
       expect(tester.takeException(), null);
       await tester.pumpWidget(
         MaterialApp(
@@ -244,4 +246,69 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(sessions.close);
   });
+  testWidgets(
+    'switching auth forms isolates field state and back is locked while submitting',
+    (tester) async {
+      final auth = MockAuth(), profiles = MockProfiles();
+      final sessions = StreamController<User?>();
+      final pending = Completer<void>();
+      when(() => auth.authStateChanges()).thenAnswer((_) => sessions.stream);
+      when(
+        () => auth.register(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+          name: any(named: 'name'),
+        ),
+      ).thenAnswer((_) => pending.future);
+      await tester.pumpWidget(
+        App(
+          auth: auth,
+          profiles: profiles,
+          onboarding: FakeOnboarding()..completed = true,
+        ),
+      );
+      sessions.add(null);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email address'),
+        'leak@example.com',
+      );
+      await tester.tap(find.byTooltip('Show password'));
+      await tester.pump();
+      await tester.ensureVisible(find.text('New here? Create an account'));
+      await tester.tap(find.text('New here? Create an account'));
+      await tester.pumpAndSettle();
+      expect(find.text('leak@example.com'), findsNothing);
+      expect(find.byTooltip('Show password'), findsNWidgets(2));
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Full name'),
+        'Mona',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email address'),
+        'mona@example.com',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'),
+        'password1',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Confirm password'),
+        'password1',
+      );
+      await tester.ensureVisible(find.text('Create account  →'));
+      await tester.tap(find.text('Create account  →'));
+      await tester.pump();
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(find.text('Create your account'), findsOneWidget);
+      pending.completeError(
+        FirebaseAuthException(code: 'network-request-failed'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Check your connection and try again.'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await tester.runAsync(sessions.close);
+    },
+  );
 }

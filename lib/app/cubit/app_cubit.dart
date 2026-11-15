@@ -64,26 +64,32 @@ class AppCubit extends Cubit<AppState> {
     emit(const AppState(AppStatus.preparingUser));
     try {
       await auth.registration?.timeout(const Duration(seconds: 25));
+      final pending = auth.pendingName;
       final profile = await profiles
           .ensureProfile(
             uid: user.uid,
             email: user.email ?? '',
-            preferredName: auth.pendingName ?? user.displayName,
+            preferredName: pending ?? user.displayName,
           )
           .timeout(const Duration(seconds: 25));
-      if (auth.pendingName != null) {
-        await profiles.saveRegisteredName(user.uid, auth.pendingName!);
+
+      var ready = profile;
+      if (pending != null) {
+        await profiles.saveRegisteredName(user.uid, pending);
+        auth.clearPendingName();
+        ready = profile.copyWith(name: pending.trim());
       }
-      final ready = auth.pendingName == null
-          ? profile
-          : await profiles.ensureProfile(
-              uid: user.uid,
-              email: user.email ?? '',
-            );
+
       if (!isClosed && generation == _generation) {
         // A restored account has already passed the introduction on another
-        // installation; persist that fact so logout/restart cannot replay it.
-        if (!onboarding.isCompleted) await onboarding.markCompleted();
+        // installation; persist that fact best-effort so logout/restart cannot replay it.
+        if (!onboarding.isCompleted) {
+          try {
+            await onboarding.markCompleted();
+          } catch (_) {
+            // Keep authenticated session usable if local preference storage fails.
+          }
+        }
         if (isClosed || generation != _generation) return;
         emit(AppState(AppStatus.authenticated, profile: ready));
       }

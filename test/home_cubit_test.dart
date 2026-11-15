@@ -121,4 +121,52 @@ void main() {
     await p.close();
     await m.close();
   });
+  test(
+    'same-UID refresh preserves loaded state without loading flash',
+    () async {
+      final profiles = MockProfiles();
+      when(() => profiles.watchProfile(any()))
+          .thenAnswer((_) => Stream.value(profile()));
+      final cubit = HomeCubit(
+        profiles,
+        (_, first, last) => Stream.value([meal(1350)]),
+        clock: () => DateTime(2026, 11, 15),
+      );
+      await cubit.start('a');
+      await settle();
+      expect(cubit.state.status, HomeStatus.loaded);
+      final emitted = <HomeStatus>[];
+      final sub = cubit.stream.listen((state) => emitted.add(state.status));
+      await cubit.refresh();
+      await settle();
+      expect(emitted, isNot(contains(HomeStatus.loading)));
+      expect(cubit.state.status, HomeStatus.loaded);
+      await sub.cancel();
+      await cubit.close();
+    },
+  );
+  test(
+    'same-UID refresh preserves loaded state without loading flash',
+    () async {
+      final profiles = MockProfiles();
+      when(() => profiles.watchProfile(any()))
+          .thenAnswer((_) => Stream.value(profile()));
+      final cubit = HomeCubit(
+        profiles,
+        (_, first, last) => Stream.value([meal(1350)]),
+        clock: () => DateTime(2026, 11, 15),
+      );
+      await cubit.start('a');
+      await settle();
+      expect(cubit.state.status, HomeStatus.loaded);
+      final emitted = <HomeStatus>[];
+      final sub = cubit.stream.listen((state) => emitted.add(state.status));
+      await cubit.refresh();
+      await settle();
+      expect(emitted, isNot(contains(HomeStatus.loading)));
+      expect(cubit.state.status, HomeStatus.loaded);
+      await sub.cancel();
+      await cubit.close();
+    },
+  );
 }

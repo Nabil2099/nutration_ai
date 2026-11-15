@@ -126,4 +126,66 @@ void main() {
     expect(cubit.state.status, AppStatus.failure);
     expect(onboarding.completed, false);
   });
+  test(
+    'restored session stays authenticated if Hive markCompleted fails',
+    () async {
+      onboarding.fails = true;
+      sessions.add(user());
+      await settle();
+      expect(cubit.state.status, AppStatus.authenticated);
+      expect(cubit.state.profile?.uid, 'a');
+    },
+  );
+  test(
+    'partial signup retry saves pending name and clears it without re-ensuring',
+    () async {
+      when(() => auth.pendingName).thenReturn('Nadia');
+      when(() => profiles.saveRegisteredName('a', 'Nadia'))
+          .thenAnswer((_) async {});
+      sessions.add(user());
+      await settle();
+      expect(cubit.state.status, AppStatus.authenticated);
+      expect(cubit.state.profile?.name, 'Nadia');
+      verify(() => profiles.saveRegisteredName('a', 'Nadia')).called(1);
+      verify(() => auth.clearPendingName()).called(1);
+      verify(
+        () => profiles.ensureProfile(
+          uid: 'a',
+          email: any(named: 'email'),
+          preferredName: 'Nadia',
+        ),
+      ).called(1);
+    },
+  );
+  test(
+    'restored session stays authenticated if Hive markCompleted fails',
+    () async {
+      onboarding.fails = true;
+      sessions.add(user());
+      await settle();
+      expect(cubit.state.status, AppStatus.authenticated);
+      expect(cubit.state.profile?.uid, 'a');
+    },
+  );
+  test(
+    'partial signup retry saves pending name and clears it without re-ensuring',
+    () async {
+      when(() => auth.pendingName).thenReturn('Nadia');
+      when(() => profiles.saveRegisteredName('a', 'Nadia'))
+          .thenAnswer((_) async {});
+      sessions.add(user());
+      await settle();
+      expect(cubit.state.status, AppStatus.authenticated);
+      expect(cubit.state.profile?.name, 'Nadia');
+      verify(() => profiles.saveRegisteredName('a', 'Nadia')).called(1);
+      verify(() => auth.clearPendingName()).called(1);
+      verify(
+        () => profiles.ensureProfile(
+          uid: 'a',
+          email: any(named: 'email'),
+          preferredName: 'Nadia',
+        ),
+      ).called(1);
+    },
+  );
 }

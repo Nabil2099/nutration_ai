@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,13 +20,20 @@ void main() {
 }
 
 class Bootstrap extends StatefulWidget {
-  const Bootstrap({super.key});
+  const Bootstrap({super.key, this.initializeServices});
+
+  final Future<Widget> Function()? initializeServices;
+
   @override
   State<Bootstrap> createState() => _BootstrapState();
 }
 
 class _BootstrapState extends State<Bootstrap> {
   late Future<Widget> _startup;
+  var _hiveInitialized = false;
+  final _startupClock = Stopwatch();
+  Timer? _presentationTimer;
+
   @override
   void initState() {
     super.initState();
@@ -32,8 +41,43 @@ class _BootstrapState extends State<Bootstrap> {
   }
 
   Future<Widget> _initialize() async {
+    _startupClock
+      ..reset()
+      ..start();
+    final minimumElapsed = Completer<void>();
+    final reduceMotion = WidgetsBinding
+        .instance
+        .platformDispatcher
+        .accessibilityFeatures
+        .disableAnimations;
+    _presentationTimer?.cancel();
+    _presentationTimer = Timer(
+      reduceMotion ? Duration.zero : SplashScreen.minimumDuration,
+      minimumElapsed.complete,
+    );
+    try {
+      final app = await (widget.initializeServices?.call() ?? _createApp());
+      // Presentation time overlaps real initialization; errors are never delayed.
+      await minimumElapsed.future;
+      return app;
+    } finally {
+      _presentationTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _presentationTimer?.cancel();
+    _startupClock.stop();
+    super.dispose();
+  }
+
+  Future<Widget> _createApp() async {
     await initializeFirebase().timeout(const Duration(seconds: 25));
-    await Hive.initFlutter();
+    if (!_hiveInitialized) {
+      await Hive.initFlutter();
+      _hiveInitialized = true;
+    }
     final preferences = await Hive.openBox<dynamic>('preferences');
     final profiles = UserProfileService(FirebaseFirestore.instance);
     return App(
@@ -51,14 +95,21 @@ class _BootstrapState extends State<Bootstrap> {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        home: snapshot.hasError
+        home:
+            snapshot.hasError &&
+                snapshot.connectionState == ConnectionState.done
             ? Scaffold(
                 body: AppErrorView(
                   message: 'App services could not start. Check your connection and Firebase platform configuration. See README for setup.',
-                  onRetry: () => setState(() => _startup = _initialize()),
+                  onRetry: () {
+                    final startup = _initialize();
+                    setState(() {
+                      _startup = startup;
+                    });
+                  },
                 ),
               )
-            : const SplashScreen(),
+            : SplashScreen(elapsed: _startupClock.elapsed),
       );
     },
   );

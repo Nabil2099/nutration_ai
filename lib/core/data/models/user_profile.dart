@@ -12,10 +12,28 @@ class UserProfile {
     this.createdAt,
     this.updatedAt,
   });
-  final String uid, name, email;
+  final String uid;
+  final String name;
+  final String email;
   final String? photoPath;
   final NutritionGoals dailyGoals;
-  final DateTime? createdAt, updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  UserProfile copyWith({
+    String? name,
+    NutritionGoals? dailyGoals,
+    String? photoPath,
+  }) => UserProfile(
+    uid: uid,
+    name: name ?? this.name,
+    email: email,
+    dailyGoals: dailyGoals ?? this.dailyGoals,
+    photoPath: photoPath ?? this.photoPath,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
+
   factory UserProfile.fromMap(Map<String, dynamic> map) {
     for (final key in ['uid', 'name', 'email']) {
       if (map[key] is! String) {

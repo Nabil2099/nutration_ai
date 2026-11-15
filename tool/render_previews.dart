@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:nutration_ai/core/navigation/main_shell.dart';
 import 'package:nutration_ai/core/theme/app_theme.dart';
 import 'package:nutration_ai/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:nutration_ai/features/auth/presentation/screens/login_screen.dart';
 import 'package:nutration_ai/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:nutration_ai/features/home/presentation/cubit/home_cubit.dart';
-import 'package:nutration_ai/features/home/presentation/screens/home_screen.dart';
 import 'package:nutration_ai/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:nutration_ai/features/splash/presentation/screens/splash_screen.dart';
 
@@ -34,8 +34,16 @@ void main() {
         .thenAnswer((_) => Stream.value(profile()));
     final home = HomeCubit(
       profiles,
-      (_, first, last) => Stream.value([meal(1350)]),
-      clock: () => DateTime(2026, 11, 15),
+      (_, first, last) => Stream.value([
+        meal(1720, key: '2026-11-09'),
+        meal(1890, key: '2026-11-10'),
+        meal(1790, key: '2026-11-11'),
+        meal(1950, key: '2026-11-12'),
+        meal(1960, key: '2026-11-13'),
+        meal(1930, key: '2026-11-14'),
+        meal(1350, key: '2026-11-15'),
+      ]),
+      clock: () => DateTime(2026, 11, 15, 9),
     );
     await home.start('a');
     final screens = <String, Widget>{
@@ -49,12 +57,12 @@ void main() {
       ),
       'onboarding': OnboardingScreen(onComplete: () {}),
       'splash': const SplashScreen(),
-      'home': BlocProvider.value(
-        value: home,
-        child: Scaffold(
-          appBar: AppBar(title: const Text('Home Dashboard')),
-          body: HomeScreen(onLog: () {}, onProfile: () {}, onCoach: () {}),
-        ),
+      'home': MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: auth),
+          BlocProvider.value(value: home),
+        ],
+        child: const MainShell(),
       ),
     };
     for (final entry in screens.entries) {

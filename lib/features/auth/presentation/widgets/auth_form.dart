@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/brand_mark.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
-import '../../../../core/widgets/brand_mark.dart';
-import '../../../../core/theme/app_colors.dart';
-import 'auth_text_field.dart';
 import 'auth_submit_button.dart';
+import 'auth_text_field.dart';
+import 'auth_validators.dart';
 
 class AuthForm extends StatefulWidget {
   const AuthForm({super.key, required this.register, required this.onSwitch});
+
   final bool register;
   final VoidCallback onSwitch;
+
   @override
   State<AuthForm> createState() => _AuthFormState();
 }
 
 class _AuthFormState extends State<AuthForm> {
   final _form = GlobalKey<FormState>();
-  final _name = TextEditingController(),
-      _email = TextEditingController(),
-      _password = TextEditingController(),
-      _confirm = TextEditingController();
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _confirm = TextEditingController();
+  bool _staySignedIn = true;
+
   @override
   void dispose() {
     for (final c in [_name, _email, _password, _confirm]) {
@@ -46,11 +51,39 @@ class _AuthFormState extends State<AuthForm> {
     builder: (context, state) {
       final loading = state.status == AuthStatus.submitting;
       return Scaffold(
+        backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: Text(widget.register ? 'Create Account' : 'Sign In'),
+          backgroundColor: AppColors.background,
+          surfaceTintColor: Colors.transparent,
+          title: Text(
+            widget.register ? 'Create Account' : 'Sign In',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
           leading: widget.register
               ? BackButton(onPressed: loading ? null : widget.onSwitch)
-              : null,
+              : const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person_outline,
+                  size: 18,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(height: 1, color: AppColors.border),
+          ),
         ),
         body: SafeArea(
           child: Align(
@@ -58,35 +91,89 @@ class _AuthFormState extends State<AuthForm> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 14,
+                ),
                 child: AutofillGroup(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Center(child: BrandMark()),
-                      const SizedBox(height: 24),
+                      const Center(child: BrandMark(size: 64, circular: true)),
+                      if (widget.register) ...[
+                        const SizedBox(height: 12),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.mintBadge,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.spa_rounded,
+                                  size: 14,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  'MINT MINIMALISM',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.6,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
                       Text(
                         widget.register
                             ? 'Create your account'
                             : 'Welcome back',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                            ?.copyWith(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                              letterSpacing: -0.5,
+                            ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
                         widget.register
-                            ? 'Start tracking your nourishment with daily goals.'
+                            ? 'Start tracking your nourishment with AI guidance.'
                             : 'Sign in to continue your balanced nutrition journey.',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1.4,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 16),
                       Container(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(28),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x0A0A5438),
+                              blurRadius: 24,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
                         ),
                         child: Form(
                           key: _form,
@@ -95,71 +182,221 @@ class _AuthFormState extends State<AuthForm> {
                             children: [
                               if (widget.register)
                                 AuthTextField(
+                                  key: const ValueKey('auth_name'),
                                   label: 'Full name',
                                   controller: _name,
                                   icon: Icons.person_outline,
                                   enabled: !loading,
-                                  validator: (v) =>
-                                      (v?.trim().length ?? 0) < 2 ||
-                                          v!.trim().length > 80
-                                      ? 'Enter a name of 2–80 characters.'
-                                      : null,
+                                  validator: AuthValidators.validateName,
                                 ),
                               AuthTextField(
+                                key: const ValueKey('auth_email'),
                                 label: 'Email address',
                                 controller: _email,
-                                icon: Icons.alternate_email,
+                                icon: widget.register
+                                    ? Icons.mail_outline_rounded
+                                    : Icons.alternate_email,
                                 keyboardType: TextInputType.emailAddress,
                                 enabled: !loading,
-                                validator: (v) =>
-                                    RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
-                                        .hasMatch(v?.trim() ?? '')
+                                trailingDot: !widget.register,
+                                topTrailing: widget.register
                                     ? null
-                                    : 'Enter a valid email address.',
+                                    : const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle_outline,
+                                            size: 14,
+                                            color: AppColors.primaryBright,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'Verified',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.primaryBright,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                validator: AuthValidators.validateEmail,
                               ),
                               AuthTextField(
+                                key: const ValueKey('auth_password'),
                                 label: 'Password',
                                 controller: _password,
                                 icon: Icons.lock_outline,
                                 password: true,
                                 enabled: !loading,
                                 last: !widget.register,
+                                bottomSpacing: 10,
                                 onSubmit: _submit,
-                                validator: (v) {
-                                  if (v == null || v.isEmpty) {
-                                    return 'Enter your password.';
-                                  }
-                                  if (widget.register &&
-                                      (v.length < 8 ||
-                                          !RegExp(r'[0-9]').hasMatch(v))) {
-                                    return 'Use at least 8 characters and 1 number.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              if (widget.register) ...[
-                                const Padding(
-                                  padding: EdgeInsets.only(bottom: 16),
-                                  child: Text(
-                                    'Use at least 8 characters and 1 number.',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondary,
+                                topTrailing: widget.register
+                                    ? null
+                                    : const Text(
+                                        'Forgot password?',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                validator: (v) =>
+                                    AuthValidators.validatePassword(
+                                      v,
+                                      isRegister: widget.register,
                                     ),
+                              ),
+                              if (!widget.register) ...[
+                                const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.verified_user_outlined,
+                                      size: 15,
+                                      color: AppColors.primaryBright,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        'Protected with clinical-grade biometric security',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  alignment: WrapAlignment.spaceBetween,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    InkWell(
+                                      borderRadius: BorderRadius.circular(8),
+                                      onTap: loading
+                                          ? null
+                                          : () => setState(
+                                              () => _staySignedIn =
+                                                  !_staySignedIn,
+                                            ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 20,
+                                            height: 20,
+                                            decoration: BoxDecoration(
+                                              color: _staySignedIn
+                                                  ? AppColors.primary
+                                                  : Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              border: Border.all(
+                                                color: AppColors.primary,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                            child: _staySignedIn
+                                                ? const Icon(
+                                                    Icons.check,
+                                                    size: 14,
+                                                    color: Colors.white,
+                                                  )
+                                                : null,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          const Text(
+                                            'Stay signed in',
+                                            style: TextStyle(
+                                              fontSize: 13.5,
+                                              color: AppColors.textPrimary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surfaceVariant,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.fingerprint,
+                                            size: 16,
+                                            color: AppColors.primary,
+                                          ),
+                                          SizedBox(width: 6),
+                                          Text(
+                                            'Touch ID',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              if (widget.register) ...[
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceVariant,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_outline,
+                                        size: 15,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'At least 8 characters with 1 number',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 AuthTextField(
+                                  key: const ValueKey('auth_confirm_password'),
                                   label: 'Confirm password',
                                   controller: _confirm,
-                                  icon: Icons.shield_outlined,
+                                  icon: Icons.verified_user_outlined,
                                   password: true,
                                   enabled: !loading,
                                   last: true,
                                   onSubmit: _submit,
                                   validator: (v) =>
-                                      v != _password.text || v!.isEmpty
-                                      ? 'Passwords must match.'
-                                      : null,
+                                      AuthValidators.validateConfirmPassword(
+                                        v,
+                                        _password.text,
+                                      ),
                                 ),
                               ],
                               if (state.errorMessage != null)
@@ -189,14 +426,88 @@ class _AuthFormState extends State<AuthForm> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Your nutrition journey, one mindful meal at a time.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
+                      if (widget.register)
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardTint,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.shield_outlined,
+                                  size: 15,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    'Encrypted health data · Clinical privacy',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppColors.cardTint,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.mintBadge,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.psychology_outlined,
+                                  size: 18,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'AI Daily Sync',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2),
+                                    Text(
+                                      'Your breakfast plan & macro targets are ready.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: loading ? null : widget.onSwitch,
@@ -204,6 +515,7 @@ class _AuthFormState extends State<AuthForm> {
                           widget.register
                               ? 'Already have an account? Log in'
                               : 'New here? Create an account',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
