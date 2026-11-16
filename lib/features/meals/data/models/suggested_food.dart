@@ -7,6 +7,7 @@ class SuggestedFood {
     required this.carbsPer100g,
     required this.fatPer100g,
     required this.emoji,
+    this.mealTypes = const {'Breakfast', 'Lunch', 'Dinner', 'Snack'},
   });
 
   final String name;
@@ -16,8 +17,10 @@ class SuggestedFood {
   final double carbsPer100g;
   final double fatPer100g;
   final String emoji;
+  final Set<String> mealTypes;
 
   static const suggestions = [
+    // Lunch & Dinner staples (kept first for default Lunch selection)
     SuggestedFood(
       name: 'Grilled Chicken Breast',
       subtitle: 'Lean poultry · Skinless',
@@ -26,6 +29,7 @@ class SuggestedFood {
       carbsPer100g: 0,
       fatPer100g: 3.6,
       emoji: '🍗',
+      mealTypes: {'Lunch', 'Dinner'},
     ),
     SuggestedFood(
       name: 'Steamed Broccoli',
@@ -35,6 +39,7 @@ class SuggestedFood {
       carbsPer100g: 7.2,
       fatPer100g: 0.4,
       emoji: '🥦',
+      mealTypes: {'Lunch', 'Dinner'},
     ),
     SuggestedFood(
       name: 'Brown Rice',
@@ -44,6 +49,161 @@ class SuggestedFood {
       carbsPer100g: 25.6,
       fatPer100g: 1,
       emoji: '🍚',
+      mealTypes: {'Lunch', 'Dinner'},
+    ),
+    // Breakfast
+    SuggestedFood(
+      name: 'Rolled Oats & Berries',
+      subtitle: 'Breakfast · High fiber',
+      caloriesPer100g: 145,
+      proteinPer100g: 5.2,
+      carbsPer100g: 25.4,
+      fatPer100g: 2.6,
+      emoji: '🥣',
+      mealTypes: {'Breakfast'},
+    ),
+    SuggestedFood(
+      name: 'Scrambled Eggs',
+      subtitle: 'Breakfast · Whole eggs',
+      caloriesPer100g: 149,
+      proteinPer100g: 10.6,
+      carbsPer100g: 1.6,
+      fatPer100g: 11.0,
+      emoji: '🍳',
+      mealTypes: {'Breakfast'},
+    ),
+    SuggestedFood(
+      name: 'Avocado Whole-Grain Toast',
+      subtitle: 'Breakfast · Healthy fats',
+      caloriesPer100g: 215,
+      proteinPer100g: 6.1,
+      carbsPer100g: 22.0,
+      fatPer100g: 11.4,
+      emoji: '🥑',
+      mealTypes: {'Breakfast', 'Snack'},
+    ),
+    SuggestedFood(
+      name: 'Greek Yogurt Parfait',
+      subtitle: 'Breakfast · High protein',
+      caloriesPer100g: 97,
+      proteinPer100g: 9.0,
+      carbsPer100g: 7.5,
+      fatPer100g: 3.2,
+      emoji: '🥛',
+      mealTypes: {'Breakfast', 'Snack'},
+    ),
+    // Lunch
+    SuggestedFood(
+      name: 'Quinoa & Chickpea Salad',
+      subtitle: 'Lunch · Plant protein',
+      caloriesPer100g: 158,
+      proteinPer100g: 6.4,
+      carbsPer100g: 23.2,
+      fatPer100g: 4.5,
+      emoji: '🥗',
+      mealTypes: {'Lunch', 'Dinner'},
+    ),
+    SuggestedFood(
+      name: 'Turkey & Hummus Wrap',
+      subtitle: 'Lunch · Balanced wrap',
+      caloriesPer100g: 192,
+      proteinPer100g: 14.5,
+      carbsPer100g: 20.8,
+      fatPer100g: 5.4,
+      emoji: '🌯',
+      mealTypes: {'Lunch'},
+    ),
+    SuggestedFood(
+      name: 'Tuna & Sweet Corn Bowl',
+      subtitle: 'Lunch · Omega-3 rich',
+      caloriesPer100g: 136,
+      proteinPer100g: 17.8,
+      carbsPer100g: 9.6,
+      fatPer100g: 2.6,
+      emoji: '🐟',
+      mealTypes: {'Lunch'},
+    ),
+    // Dinner
+    SuggestedFood(
+      name: 'Baked Atlantic Salmon',
+      subtitle: 'Dinner · Omega-3 fillet',
+      caloriesPer100g: 208,
+      proteinPer100g: 20.4,
+      carbsPer100g: 0,
+      fatPer100g: 13.4,
+      emoji: '🍣',
+      mealTypes: {'Dinner', 'Lunch'},
+    ),
+    SuggestedFood(
+      name: 'Roasted Sweet Potato',
+      subtitle: 'Dinner · Complex carbs',
+      caloriesPer100g: 90,
+      proteinPer100g: 2.0,
+      carbsPer100g: 20.7,
+      fatPer100g: 0.2,
+      emoji: '🍠',
+      mealTypes: {'Dinner', 'Lunch'},
+    ),
+    SuggestedFood(
+      name: 'Red Lentil Coconut Curry',
+      subtitle: 'Dinner · Spiced legumes',
+      caloriesPer100g: 142,
+      proteinPer100g: 7.6,
+      carbsPer100g: 17.5,
+      fatPer100g: 4.6,
+      emoji: '🍛',
+      mealTypes: {'Dinner'},
+    ),
+    SuggestedFood(
+      name: 'Grilled Lean Beef Steak',
+      subtitle: 'Dinner · Iron & protein',
+      caloriesPer100g: 218,
+      proteinPer100g: 27.5,
+      carbsPer100g: 0,
+      fatPer100g: 11.2,
+      emoji: '🥩',
+      mealTypes: {'Dinner'},
+    ),
+    // Snacks
+    SuggestedFood(
+      name: 'Roasted Almonds',
+      subtitle: 'Snack · Crunchy nuts',
+      caloriesPer100g: 579,
+      proteinPer100g: 21.2,
+      carbsPer100g: 21.6,
+      fatPer100g: 49.9,
+      emoji: '🌰',
+      mealTypes: {'Snack'},
+    ),
+    SuggestedFood(
+      name: 'Apple & Peanut Butter',
+      subtitle: 'Snack · Sweet & nutty',
+      caloriesPer100g: 148,
+      proteinPer100g: 4.1,
+      carbsPer100g: 17.2,
+      fatPer100g: 7.4,
+      emoji: '🍎',
+      mealTypes: {'Snack', 'Breakfast'},
+    ),
+    SuggestedFood(
+      name: 'Cottage Cheese & Pineapple',
+      subtitle: 'Snack · Casein protein',
+      caloriesPer100g: 88,
+      proteinPer100g: 9.8,
+      carbsPer100g: 6.5,
+      fatPer100g: 2.3,
+      emoji: '🍍',
+      mealTypes: {'Snack', 'Breakfast'},
+    ),
+    SuggestedFood(
+      name: 'Banana Protein Smoothie',
+      subtitle: 'Snack · Post-workout',
+      caloriesPer100g: 96,
+      proteinPer100g: 8.4,
+      carbsPer100g: 13.0,
+      fatPer100g: 1.2,
+      emoji: '🥤',
+      mealTypes: {'Snack', 'Breakfast'},
     ),
   ];
 }

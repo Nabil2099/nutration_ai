@@ -53,6 +53,47 @@ class AddMealCubit extends Cubit<AddMealState> {
     emit(_copyWith(portions: portions, clearError: true));
   }
 
+  void toggleFilterByMealType() =>
+      emit(_copyWith(filterByMealType: !state.filterByMealType));
+
+  /// Adds a user-defined custom food/meal and selects it with [servingGrams].
+  void addCustomFood({
+    required String name,
+    required double servingGrams,
+    required double calories,
+    required double proteinG,
+    required double carbsG,
+    required double fatG,
+    String emoji = '🍽️',
+  }) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty || servingGrams <= 0) return;
+    final factor = 100 / servingGrams;
+    final custom = SuggestedFood(
+      name: trimmed,
+      subtitle: 'Custom · ${state.mealType}',
+      caloriesPer100g: calories * factor,
+      proteinPer100g: proteinG * factor,
+      carbsPer100g: carbsG * factor,
+      fatPer100g: fatG * factor,
+      emoji: emoji,
+      mealTypes: {state.mealType},
+    );
+    final updatedCustom = [
+      custom,
+      ...state.customFoods.where((f) => f.name != trimmed),
+    ];
+    final portions = Map<String, int>.from(state.portions);
+    portions[trimmed] = servingGrams.round().clamp(1, 2000);
+    emit(
+      _copyWith(
+        customFoods: updatedCustom,
+        portions: portions,
+        clearError: true,
+      ),
+    );
+  }
+
   /// Persists the selected foods as a single meal entry. Returns `true` if
   /// saved successfully, `false` otherwise.
   Future<bool> submit() async {
@@ -106,6 +147,8 @@ class AddMealCubit extends Cubit<AddMealState> {
     String? mealType,
     String? query,
     Map<String, int>? portions,
+    List<SuggestedFood>? customFoods,
+    bool? filterByMealType,
     bool? saving,
     String? errorMessage,
     bool clearError = false,
@@ -113,6 +156,8 @@ class AddMealCubit extends Cubit<AddMealState> {
     mealType: mealType ?? state.mealType,
     query: query ?? state.query,
     portions: portions ?? state.portions,
+    customFoods: customFoods ?? state.customFoods,
+    filterByMealType: filterByMealType ?? state.filterByMealType,
     saving: saving ?? state.saving,
     errorMessage: clearError ? null : (errorMessage ?? state.errorMessage),
   );

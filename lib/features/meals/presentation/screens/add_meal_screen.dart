@@ -7,6 +7,7 @@ import '../cubit/add_meal_state.dart';
 import '../widgets/add_meal_header.dart';
 import '../widgets/add_meal_summary_bar.dart';
 import '../widgets/coach_suggestion_banner.dart';
+import '../widgets/custom_food_dialog.dart';
 import '../widgets/meal_search_field.dart';
 import '../widgets/meal_type_selector.dart';
 import '../widgets/suggested_food_card.dart';
@@ -56,7 +57,26 @@ class _AddMealView extends StatelessWidget {
                           const SizedBox(height: 12),
                           const CoachSuggestionBanner(),
                           const SizedBox(height: 18),
-                          const SuggestedFoodHeader(),
+                          SuggestedFoodHeader(
+                            mealType: state.mealType,
+                            filterByMealType: state.filterByMealType,
+                            onToggleFilter: cubit.toggleFilterByMealType,
+                            onAddCustom: () async {
+                              final draft = await showCustomFoodDialog(
+                                context,
+                                mealType: state.mealType,
+                              );
+                              if (draft == null || !context.mounted) return;
+                              cubit.addCustomFood(
+                                name: draft.name,
+                                servingGrams: draft.servingGrams,
+                                calories: draft.calories,
+                                proteinG: draft.proteinG,
+                                carbsG: draft.carbsG,
+                                fatG: draft.fatG,
+                              );
+                            },
+                          ),
                           const SizedBox(height: 10),
                           for (final food in state.visibleFoods) ...[
                             SuggestedFoodCard(
