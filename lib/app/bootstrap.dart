@@ -144,7 +144,7 @@ class _BootstrapState extends State<Bootstrap> {
                   snapshot.connectionState == ConnectionState.done
               ? Scaffold(
                   body: AppErrorView(
-                    message: 'App services could not start. Check your connection and Firebase platform configuration. See README for setup.',
+                    message: 'App services could not start. Check your connection and Firebase platform configuration.',
                     onRetry: () {
                       final startup = _initialize();
                       setState(() {
