@@ -42,4 +42,3 @@ Widget withScreenUtil({required Widget child}) => ScreenUtilInit(
   splitScreenMode: true,
   builder: (_, _) => child,
 );
-

@@ -60,10 +60,10 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
     bool positive = false,
   }) {
     final parsed = double.tryParse((v ?? '').trim());
-    if (parsed == null) return 'Enter a number';
-    if (positive && parsed <= 0) return 'Must be > 0';
-    if (!positive && parsed < 0) return 'Must be >= 0';
-    if (parsed > max) return 'Max ${max.round()}';
+    if (parsed == null) return 'Invalid';
+    if (positive && parsed <= 0) return '> 0';
+    if (!positive && parsed < 0) return '>= 0';
+    if (parsed > max) return '<= ${max.round()}';
     return null;
   }
 
@@ -81,141 +81,256 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
     );
   }
 
+  InputDecoration _fieldDecoration(
+    String label, {
+    String? hint,
+    String? suffixText,
+    Color? labelColor,
+  }) => InputDecoration(
+    labelText: label,
+    hintText: hint,
+    suffixText: suffixText,
+    isDense: true,
+    filled: true,
+    fillColor: AppColors.surfaceVariant,
+    labelStyle: TextStyle(
+      fontSize: 13,
+      color: labelColor ?? AppColors.textSecondary,
+      fontWeight: FontWeight.w500,
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: AppColors.border),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: AppColors.border),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(
+        color: Theme.of(context).colorScheme.error,
+        width: 1.5,
+      ),
+    ),
+  );
+
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => Dialog(
     backgroundColor: Colors.white,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    title: Row(
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: const BoxDecoration(
-            color: AppColors.mintBadge,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.restaurant_rounded,
-            size: 18,
-            color: AppColors.primary,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            'Add Custom ${widget.mealType}',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-          ),
-        ),
-      ],
-    ),
-    content: SingleChildScrollView(
-      child: Form(
-        key: _form,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _name,
-              textCapitalization: TextCapitalization.words,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Meal or food name',
-                hintText: 'e.g. Homemade Shakshuka',
+    insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+        child: Form(
+          key: _form,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: AppColors.mintBadge,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.restaurant_rounded,
+                      size: 20,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Add Custom ${widget.mealType}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const Text(
+                          'Enter nutrition for your serving',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              validator: (v) {
-                final trimmed = (v ?? '').trim();
-                if (trimmed.isEmpty) return 'Enter a meal name';
-                if (trimmed.length > 200) return 'Max 200 characters';
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _grams,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Serving (g)'),
-                    validator: (v) =>
-                        _validateNumber(v, max: 20000, positive: true),
-                  ),
+              const SizedBox(height: 18),
+              TextFormField(
+                controller: _name,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                decoration: _fieldDecoration(
+                  'Meal or food name',
+                  hint: 'e.g. Homemade Shakshuka',
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextFormField(
-                    controller: _calories,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                validator: (v) {
+                  final trimmed = (v ?? '').trim();
+                  if (trimmed.isEmpty) return 'Enter a meal name';
+                  if (trimmed.length > 200) return 'Max 200 characters';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _grams,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.next,
+                      decoration: _fieldDecoration(
+                        'Serving (g)',
+                        suffixText: 'g',
+                      ),
+                      validator: (v) =>
+                          _validateNumber(v, max: 20000, positive: true),
                     ),
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Calories (kcal)',
-                    ),
-                    validator: (v) => _validateNumber(v, max: 50000),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _protein,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _calories,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.next,
+                      decoration: _fieldDecoration(
+                        'Calories (kcal)',
+                        suffixText: 'kcal',
+                      ),
+                      validator: (v) => _validateNumber(v, max: 50000),
                     ),
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Protein (g)'),
-                    validator: (v) => _validateNumber(v, max: 10000),
                   ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'MACROS (GRAMS)',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: AppColors.textSecondary,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    controller: _carbs,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _protein,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.next,
+                      decoration: _fieldDecoration(
+                        'Protein',
+                        suffixText: 'g',
+                        labelColor: AppColors.protein,
+                      ),
+                      validator: (v) => _validateNumber(v, max: 10000),
                     ),
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Carbs (g)'),
-                    validator: (v) => _validateNumber(v, max: 10000),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    controller: _fat,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _carbs,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.next,
+                      decoration: _fieldDecoration(
+                        'Carbs',
+                        suffixText: 'g',
+                        labelColor: AppColors.carbs,
+                      ),
+                      validator: (v) => _validateNumber(v, max: 10000),
                     ),
-                    textInputAction: TextInputAction.done,
-                    onFieldSubmitted: (_) => _save(),
-                    decoration: const InputDecoration(labelText: 'Fat (g)'),
-                    validator: (v) => _validateNumber(v, max: 10000),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _fat,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _save(),
+                      decoration: _fieldDecoration(
+                        'Fat',
+                        suffixText: 'g',
+                        labelColor: AppColors.fats,
+                      ),
+                      validator: (v) => _validateNumber(v, max: 10000),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary,
+                        side: const BorderSide(color: AppColors.border),
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: _save,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: const Text('Add Meal'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Cancel'),
-      ),
-      FilledButton(
-        onPressed: _save,
-        style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
-        child: const Text('Add Meal'),
-      ),
-    ],
   );
 }
