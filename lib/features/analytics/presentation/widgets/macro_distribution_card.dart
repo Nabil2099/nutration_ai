@@ -25,13 +25,17 @@ class MacroDistributionCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'How your calories are balanced',
-            style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 20),
           if (macros.totalKcal == 0)
             Text(
               'No macro data yet',
-              style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
             )
           else ...[
             ClipRRect(
@@ -122,13 +126,12 @@ class _MacroTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            Text(
-              '${(percent * 100).round()}%',
-              style: textTheme.titleLarge,
-            ),
+            Text('${(percent * 100).round()}%', style: textTheme.titleLarge),
             Text(
               '${grams.round()}g / day',
-              style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),

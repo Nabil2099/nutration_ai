@@ -51,7 +51,9 @@ class CalorieIntakeChart extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Your daily calories this week',
-            style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 20),
           Row(

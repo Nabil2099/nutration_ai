@@ -27,7 +27,9 @@ class MealHistoryCard extends StatelessWidget {
               children: [
                 Text(
                   meal.mealType.toUpperCase(),
-                  style: textTheme.labelSmall?.copyWith(color: AppColors.primary),
+                  style: textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -65,7 +67,9 @@ class MealHistoryCard extends StatelessWidget {
               Text('${meal.caloriesKcal.round()}', style: textTheme.titleLarge),
               Text(
                 'kcal',
-                style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),

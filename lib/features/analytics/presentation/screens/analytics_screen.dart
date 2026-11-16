@@ -109,9 +109,8 @@ class _AnalyticsBodyState extends State<_AnalyticsBody> {
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Text(
             'No meals logged for this day.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: AppColors.textSecondary),
           ),
         )
       else

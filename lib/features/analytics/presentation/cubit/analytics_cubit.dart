@@ -31,11 +31,7 @@ class AnalyticsCubit extends Cubit<AnalyticsState> {
 
     final today = DateTime.now();
     _selectedDay = today;
-    _mealSub = reader(
-      uid,
-      dayKey(calendarDay(today, -6)),
-      dayKey(today),
-    ).listen(
+    _mealSub = reader(uid, dayKey(calendarDay(today, -6)), dayKey(today)).listen(
       (meals) {
         _meals = meals;
         _emitLoaded();
@@ -44,7 +40,8 @@ class AnalyticsCubit extends Cubit<AnalyticsState> {
         _meals = null;
         emit(
           const AnalyticsError(
-            message: 'Could not load your meals. Check your connection and retry.',
+            message:
+                'Could not load your meals. Check your connection and retry.',
           ),
         );
       },

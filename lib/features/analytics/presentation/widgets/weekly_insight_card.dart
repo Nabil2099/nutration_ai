@@ -33,10 +33,16 @@ class WeeklyInsightCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text('Your Weekly Insight', style: textTheme.titleMedium),
+                      child: Text(
+                        'Your Weekly Insight',
+                        style: textTheme.titleMedium,
+                      ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(12),
@@ -48,7 +54,9 @@ class WeeklyInsightCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   message,
-                  style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),

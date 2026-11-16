@@ -38,11 +38,15 @@ class TodayNutritionCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '${consumedKcal.round()} kcal',
-            style: textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary),
+            style: textTheme.headlineSmall?.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
           Text(
             'of ${goalKcal.round()} kcal target consumed',
-            style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 16),
           ClipRRect(
@@ -60,12 +64,16 @@ class TodayNutritionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   '$remaining kcal remaining',
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.primary),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
               Text(
                 '$percent% of daily goal',
-                style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),

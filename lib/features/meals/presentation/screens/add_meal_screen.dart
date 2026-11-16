@@ -13,11 +13,15 @@ import '../widgets/suggested_food_card.dart';
 import '../widgets/suggested_food_header.dart';
 
 class AddMealScreen extends StatelessWidget {
-  const AddMealScreen({super.key});
+  const AddMealScreen({super.key, this.onSave});
+
+  final MealSaver? onSave;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocProvider(create: (_) => AddMealCubit(), child: const _AddMealView());
+  Widget build(BuildContext context) => BlocProvider(
+    create: (_) => AddMealCubit(onSave: onSave),
+    child: const _AddMealView(),
+  );
 }
 
 class _AddMealView extends StatelessWidget {
@@ -89,6 +93,23 @@ class _AddMealView extends StatelessWidget {
                 protein: state.protein,
                 carbs: state.carbs,
                 fat: state.fat,
+                saving: state.saving,
+                onSubmit: () async {
+                  final saved = await cubit.submit();
+                  if (!context.mounted) return;
+                  if (saved) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Added to ${state.mealType} log.'),
+                      ),
+                    );
+                    Navigator.of(context).pop();
+                  } else if (cubit.state.errorMessage != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(cubit.state.errorMessage!)),
+                    );
+                  }
+                },
               ),
             ],
           ),

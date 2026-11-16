@@ -12,6 +12,8 @@ class AddMealSummaryBar extends StatelessWidget {
     required this.protein,
     required this.carbs,
     required this.fat,
+    this.saving = false,
+    this.onSubmit,
   });
 
   final String mealType;
@@ -20,6 +22,8 @@ class AddMealSummaryBar extends StatelessWidget {
   final double protein;
   final double carbs;
   final double fat;
+  final bool saving;
+  final VoidCallback? onSubmit;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -86,15 +90,7 @@ class AddMealSummaryBar extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: foodCount == 0
-                ? null
-                : () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Meal selected. Saving will be enabled when the meal service is connected.',
-                      ),
-                    ),
-                  ),
+            onPressed: foodCount == 0 || saving ? null : onSubmit,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primaryBright,
               foregroundColor: Colors.white,
@@ -103,8 +99,17 @@ class AddMealSummaryBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(28),
               ),
             ),
-            icon: const Icon(Icons.check_rounded, size: 18),
-            label: const Text('Add to My Log'),
+            icon: saving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.check_rounded, size: 18),
+            label: Text(saving ? 'Saving...' : 'Add to My Log'),
           ),
         ),
       ],

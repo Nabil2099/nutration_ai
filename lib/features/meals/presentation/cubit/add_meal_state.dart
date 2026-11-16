@@ -5,6 +5,8 @@ class AddMealState {
     required this.mealType,
     required this.query,
     required Map<String, int> portions,
+    this.saving = false,
+    this.errorMessage,
   }) : portions = Map.unmodifiable(portions);
 
   static const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
@@ -12,6 +14,8 @@ class AddMealState {
   final String mealType;
   final String query;
   final Map<String, int> portions;
+  final bool saving;
+  final String? errorMessage;
 
   List<SuggestedFood> get visibleFoods => SuggestedFood.suggestions
       .where(

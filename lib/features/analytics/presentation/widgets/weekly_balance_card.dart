@@ -32,16 +32,22 @@ class WeeklyBalanceCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Based on your last 7 days of food logs',
-            style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'Weekly Average',
-            style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           Text(
             '${weeklyAverage.round()} kcal/day',
-            style: textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary),
+            style: textTheme.headlineSmall?.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
         ],
       ),
