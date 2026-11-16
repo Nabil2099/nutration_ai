@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../app/cubit/app_cubit.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/meals/presentation/screens/add_meal_screen.dart';
 import '../theme/app_colors.dart';
 import 'main_destination.dart';
 
@@ -13,6 +14,13 @@ class TeamScreens {
   final WidgetBuilder? coach;
   final WidgetBuilder? profile;
   final WidgetBuilder? addMeal;
+
+  TeamScreens withProfileFallback(WidgetBuilder fallback) => TeamScreens(
+    analytics: analytics,
+    coach: coach,
+    profile: profile ?? fallback,
+    addMeal: addMeal,
+  );
 }
 
 class MainShell extends StatefulWidget {
@@ -32,10 +40,7 @@ class _MainShellState extends State<MainShell> {
 
   void _log() => Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder:
-          widget.screens.addMeal ??
-          (_) =>
-              const IntegrationPlaceholder(name: 'Add Meal', standalone: true),
+      builder: widget.screens.addMeal ?? (_) => const AddMealScreen(),
     ),
   );
 

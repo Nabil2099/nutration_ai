@@ -9,6 +9,7 @@ import '../features/auth/presentation/screens/sign_up_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/home/presentation/cubit/home_cubit.dart';
+import '../features/profile/presentation/screens/profile_screen.dart';
 import '../core/data/services/user_profile_service.dart';
 import '../core/data/services/meal_reader.dart';
 import '../core/navigation/main_shell.dart';
@@ -52,12 +53,19 @@ class AppGate extends StatelessWidget {
             ),
           );
         case AppStatus.authenticated:
+          final sessionScreens = screens.withProfileFallback(
+            (_) => ProfileScreen(
+              profile: state.profile!,
+              profiles: profiles,
+              onLogOut: cubit.signOut,
+            ),
+          );
           // A session-scoped navigator disposes all pushed pages on logout/UID change.
           return BlocProvider(
             key: ValueKey(state.profile!.uid),
             create: (_) =>
                 HomeCubit(profiles, mealReader)..start(state.profile!.uid),
-            child: _SessionNavigator(screens: screens),
+            child: _SessionNavigator(screens: sessionScreens),
           );
       }
     },
