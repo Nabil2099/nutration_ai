@@ -54,11 +54,16 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
     super.dispose();
   }
 
-  String? _requiredNonNegative(String? v, {bool positive = false}) {
+  String? _validateNumber(
+    String? v, {
+    required double max,
+    bool positive = false,
+  }) {
     final parsed = double.tryParse((v ?? '').trim());
     if (parsed == null) return 'Enter a number';
     if (positive && parsed <= 0) return 'Must be > 0';
     if (!positive && parsed < 0) return 'Must be >= 0';
+    if (parsed > max) return 'Max ${max.round()}';
     return null;
   }
 
@@ -78,7 +83,32 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text('Add Custom ${widget.mealType}'),
+    backgroundColor: Colors.white,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    title: Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: const BoxDecoration(
+            color: AppColors.mintBadge,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.restaurant_rounded,
+            size: 18,
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            'Add Custom ${widget.mealType}',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    ),
     content: SingleChildScrollView(
       child: Form(
         key: _form,
@@ -88,12 +118,17 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
             TextFormField(
               controller: _name,
               textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
                 labelText: 'Meal or food name',
                 hintText: 'e.g. Homemade Shakshuka',
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Enter a meal name' : null,
+              validator: (v) {
+                final trimmed = (v ?? '').trim();
+                if (trimmed.isEmpty) return 'Enter a meal name';
+                if (trimmed.length > 200) return 'Max 200 characters';
+                return null;
+              },
             ),
             const SizedBox(height: 12),
             Row(
@@ -101,20 +136,27 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                 Expanded(
                   child: TextFormField(
                     controller: _grams,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(labelText: 'Serving (g)'),
-                    validator: (v) => _requiredNonNegative(v, positive: true),
+                    validator: (v) =>
+                        _validateNumber(v, max: 20000, positive: true),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextFormField(
                     controller: _calories,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
                       labelText: 'Calories (kcal)',
                     ),
-                    validator: _requiredNonNegative,
+                    validator: (v) => _validateNumber(v, max: 50000),
                   ),
                 ),
               ],
@@ -125,27 +167,37 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                 Expanded(
                   child: TextFormField(
                     controller: _protein,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(labelText: 'Protein (g)'),
-                    validator: _requiredNonNegative,
+                    validator: (v) => _validateNumber(v, max: 10000),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextFormField(
                     controller: _carbs,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(labelText: 'Carbs (g)'),
-                    validator: _requiredNonNegative,
+                    validator: (v) => _validateNumber(v, max: 10000),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextFormField(
                     controller: _fat,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _save(),
                     decoration: const InputDecoration(labelText: 'Fat (g)'),
-                    validator: _requiredNonNegative,
+                    validator: (v) => _validateNumber(v, max: 10000),
                   ),
                 ),
               ],
@@ -167,4 +219,3 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
     ],
   );
 }
-

@@ -20,6 +20,7 @@ class CoachComposer extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: AppColors.border),
       boxShadow: const [
         BoxShadow(
           color: Color(0x140A5438),

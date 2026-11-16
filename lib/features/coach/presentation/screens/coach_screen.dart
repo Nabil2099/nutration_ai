@@ -121,10 +121,12 @@ class _CoachViewState extends State<_CoachView> {
                     message: state.messages[i],
                     meals: state.meals,
                     carbsGoalG: carbsGoal,
-                    onQuickPrompt: i == state.messages.length - 1
+                    onQuickPrompt:
+                        !state.sending && i == state.messages.length - 1
                         ? (prompt) => _send(prompt)
                         : null,
                   ),
+                if (state.sending) const _ThinkingBubble(),
               ],
             ),
           ),
@@ -139,5 +141,48 @@ class _CoachViewState extends State<_CoachView> {
         ],
       );
     },
+  );
+}
+
+class _ThinkingBubble extends StatelessWidget {
+  const _ThinkingBubble();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 18),
+    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x0A0A5438),
+          blurRadius: 16,
+          offset: Offset(0, 4),
+        ),
+      ],
+    ),
+    child: const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primary,
+          ),
+        ),
+        SizedBox(width: 12),
+        Text(
+          'Sage AI is thinking...',
+          style: TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    ),
   );
 }
