@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/responsive.dart';
 
 class GreetingHeader extends StatelessWidget {
   const GreetingHeader({
@@ -35,21 +36,17 @@ class GreetingHeader extends StatelessWidget {
               children: [
                 Text(
                   DateFormat('EEEE, MMM d').format(date),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 12,
+                    fontSize: 12.rsp,
                   ),
                 ),
-                const Icon(
-                  Icons.circle,
-                  size: 6,
-                  color: AppColors.primaryBright,
-                ),
-                const Text(
+                Icon(Icons.circle, size: 6.rw, color: AppColors.primaryBright),
+                Text(
                   'On Track',
                   style: TextStyle(
                     color: AppColors.primaryBright,
-                    fontSize: 12,
+                    fontSize: 12.rsp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

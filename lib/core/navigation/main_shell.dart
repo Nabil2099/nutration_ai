@@ -5,6 +5,7 @@ import '../../app/cubit/app_cubit.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/meals/presentation/screens/add_meal_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/responsive.dart';
 import 'main_destination.dart';
 
 class TeamScreens {
@@ -126,11 +127,11 @@ class _MainShellState extends State<MainShell> {
     ),
     bottomNavigationBar: SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        padding: EdgeInsets.fromLTRB(16.rw, 8.rh, 16.rw, 12.rh),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(36),
+            borderRadius: BorderRadius.circular(36.rr),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x140A5438),
@@ -139,7 +140,7 @@ class _MainShellState extends State<MainShell> {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 6.rw, vertical: 8.rh),
           child: Row(
             children: [
               _destination(MainDestination.home, Icons.home_rounded, 'Home'),

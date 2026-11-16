@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/responsive.dart';
 
 class CalorieProgressRing extends StatelessWidget {
   const CalorieProgressRing({
@@ -25,13 +26,13 @@ class CalorieProgressRing extends StatelessWidget {
           ? 'Set a daily goal'
           : '${remaining.abs().round()} kilocalories ${remaining < 0 ? 'over goal' : 'remaining'}',
       child: SizedBox(
-        width: 220,
-        height: 220,
+        width: 220.rw,
+        height: 220.rw,
         child: CustomPaint(
           painter: _RingPainter(progress),
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(30),
+              padding: EdgeInsets.all(30.rw),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Column(
@@ -43,14 +44,14 @@ class CalorieProgressRing extends StatelessWidget {
                           : remaining < 0
                           ? 'OVER GOAL'
                           : 'REMAINING',
-                      style: const TextStyle(
-                        fontSize: 11.5,
+                      style: TextStyle(
+                        fontSize: 11.5.rsp,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.8,
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.rh),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -58,19 +59,19 @@ class CalorieProgressRing extends StatelessWidget {
                       children: [
                         Text(
                           goal <= 0 ? '—' : '${remaining.abs().round()}',
-                          style: const TextStyle(
-                            fontSize: 38,
+                          style: TextStyle(
+                            fontSize: 38.rsp,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
                             letterSpacing: -0.8,
                           ),
                         ),
                         if (goal > 0) ...[
-                          const SizedBox(width: 4),
-                          const Text(
+                          SizedBox(width: 4.rw),
+                          Text(
                             'kcal',
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 15.rsp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.primaryBright,
                             ),
@@ -78,11 +79,11 @@ class CalorieProgressRing extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2.rh),
                     Text(
                       'out of $formattedGoal kcal',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: TextStyle(
+                        fontSize: 12.rsp,
                         color: AppColors.textSecondary,
                       ),
                     ),

@@ -13,6 +13,7 @@ import '../core/data/services/user_profile_service.dart';
 import '../core/firebase_bootstrap.dart';
 import '../core/navigation/main_shell.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/responsive.dart';
 import '../core/widgets/app_error_view.dart';
 import '../features/analytics/presentation/screens/analytics_screen.dart';
 import '../features/auth/data/services/auth_service.dart';
@@ -134,24 +135,26 @@ class _BootstrapState extends State<Bootstrap> {
     future: _startup,
     builder: (context, snapshot) {
       if (snapshot.hasData) return snapshot.data!;
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        home:
-            snapshot.hasError &&
-                snapshot.connectionState == ConnectionState.done
-            ? Scaffold(
-                body: AppErrorView(
-                  message: 'App services could not start. Check your connection and Firebase platform configuration. See README for setup.',
-                  onRetry: () {
-                    final startup = _initialize();
-                    setState(() {
-                      _startup = startup;
-                    });
-                  },
-                ),
-              )
-            : SplashScreen(elapsed: _startupClock.elapsed),
+      return withScreenUtil(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          home:
+              snapshot.hasError &&
+                  snapshot.connectionState == ConnectionState.done
+              ? Scaffold(
+                  body: AppErrorView(
+                    message: 'App services could not start. Check your connection and Firebase platform configuration. See README for setup.',
+                    onRetry: () {
+                      final startup = _initialize();
+                      setState(() {
+                        _startup = startup;
+                      });
+                    },
+                  ),
+                )
+              : SplashScreen(elapsed: _startupClock.elapsed),
+        ),
       );
     },
   );

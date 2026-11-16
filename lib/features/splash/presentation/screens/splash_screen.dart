@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/responsive.dart';
 import '../../../../core/widgets/brand_mark.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -98,9 +99,9 @@ class _SplashScreenState extends State<SplashScreen>
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 32,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 28.rw,
+                  vertical: 32.rh,
                 ),
                 child: Center(
                   child: ConstrainedBox(
