@@ -1,3 +1,4 @@
+import '../../data/models/meal_analysis.dart';
 import '../../data/models/suggested_food.dart';
 
 class AddMealState {
@@ -8,9 +9,14 @@ class AddMealState {
     List<SuggestedFood> customFoods = const [],
     this.filterByMealType = false,
     this.saving = false,
+    this.analyzing = false,
+    this.analysis,
     this.errorMessage,
   }) : portions = Map.unmodifiable(portions),
-       customFoods = List.unmodifiable(customFoods);
+       customFoods = List.unmodifiable(customFoods),
+       scannedFoods = List.unmodifiable(
+         analysis?.toSuggestedFoods(mealType: mealType) ?? const [],
+       );
 
   static const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
@@ -20,12 +26,29 @@ class AddMealState {
   final List<SuggestedFood> customFoods;
   final bool filterByMealType;
   final bool saving;
+
+  /// True while a meal photo is being analyzed by the AI.
+  final bool analyzing;
+
+  /// Result of the latest successful meal-photo analysis (null if none).
+  final MealAnalysis? analysis;
+
+  /// Foods derived from [analysis], pre-portioned to the estimated weights.
+  /// Recomputed whenever the state is copied so meal-type filters stay fresh.
+  final List<SuggestedFood> scannedFoods;
+
   final String? errorMessage;
 
-  List<SuggestedFood> get allFoods => [
-    ...customFoods,
-    ...SuggestedFood.suggestions,
-  ];
+  List<SuggestedFood> get allFoods {
+    final scannedNames = {for (final food in scannedFoods) food.name};
+    return [
+      ...scannedFoods,
+      ...customFoods.where((food) => !scannedNames.contains(food.name)),
+      ...SuggestedFood.suggestions.where(
+        (food) => !scannedNames.contains(food.name),
+      ),
+    ];
+  }
 
   List<SuggestedFood> get visibleFoods {
     final lowerQuery = query.toLowerCase();
@@ -41,8 +64,11 @@ class AddMealState {
       return true;
     }).toList();
 
-    // Prioritize custom foods and foods matching the selected mealType first.
+    // Prioritize scanned foods, then customs, then foods matching mealType.
     filtered.sort((a, b) {
+      final aScan = scannedFoods.contains(a) ? 0 : 1;
+      final bScan = scannedFoods.contains(b) ? 0 : 1;
+      if (aScan != bScan) return aScan.compareTo(bScan);
       final aCustom = customFoods.contains(a) ? 0 : 1;
       final bCustom = customFoods.contains(b) ? 0 : 1;
       if (aCustom != bCustom) return aCustom.compareTo(bCustom);
