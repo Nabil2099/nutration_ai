@@ -20,6 +20,8 @@ dependencies:
   flutter_screenutil: ^5.9.3
   hive_flutter: ^1.1.0
   intl: ^0.20.3
+  # Camera & gallery capture for the AI meal-photo scan.
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

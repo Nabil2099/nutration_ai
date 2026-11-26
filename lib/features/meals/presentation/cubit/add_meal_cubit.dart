@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/meal_analysis.dart';
 import '../../data/models/suggested_food.dart';
+import '../../data/services/meal_photo_analyzer.dart';
 import 'add_meal_state.dart';
 
 typedef MealSaver = Future<void> Function({
@@ -14,7 +18,7 @@ typedef MealSaver = Future<void> Function({
 });
 
 class AddMealCubit extends Cubit<AddMealState> {
-  AddMealCubit({this.onSave})
+  AddMealCubit({this.onSave, this.photoAnalyzer})
     : super(
         AddMealState(
           mealType: 'Lunch',
@@ -24,6 +28,7 @@ class AddMealCubit extends Cubit<AddMealState> {
       );
 
   final MealSaver? onSave;
+  final MealPhotoAnalyzerFn? photoAnalyzer;
 
   void selectMealType(String mealType) {
     if (AddMealState.mealTypes.contains(mealType)) {
@@ -94,6 +99,66 @@ class AddMealCubit extends Cubit<AddMealState> {
     );
   }
 
+  /// Analyzes a meal photo via AI, then pre-selects every detected food at
+  /// its estimated portion. Returns an error message on failure, or `null`
+  /// on success.
+  Future<String?> analyzePhoto(Uint8List imageBytes) async {
+    final analyzer = photoAnalyzer;
+    if (analyzer == null) {
+      return 'Photo scan will be available when the AI service is connected.';
+    }
+    if (state.analyzing) return null;
+
+    emit(_copyWith(analyzing: true));
+    try {
+      final analysis = await analyzer(
+        imageBytes,
+        mealTypeHint: state.mealType,
+      );
+      if (isClosed) return null;
+
+      // Portion every detected food at its estimated weight; drop items from
+      // a previous scan that no longer appear in this one.
+      final newNames = {for (final item in analysis.items) item.name};
+      final oldNames = {for (final food in state.scannedFoods) food.name};
+      final portions = Map<String, int>.from(state.portions)
+        ..removeWhere(
+          (name, _) => oldNames.contains(name) && !newNames.contains(name),
+        );
+      for (final item in analysis.items) {
+        portions[item.name] = item.grams.round().clamp(1, 2000);
+      }
+
+      emit(
+        _copyWith(
+          analyzing: false,
+          analysis: analysis,
+          portions: portions,
+          // Make sure freshly scanned foods are visible regardless of the
+          // previous search term.
+          query: '',
+          clearError: true,
+        ),
+      );
+      return null;
+    } on MealPhotoAnalyzerException catch (e) {
+      if (!isClosed) emit(_copyWith(analyzing: false));
+      return e.message;
+    } catch (_) {
+      if (!isClosed) emit(_copyWith(analyzing: false));
+      return 'Could not analyze the photo. Check your connection and try again.';
+    }
+  }
+
+  /// Removes the latest scan result and deselects its foods.
+  void clearScan() {
+    if (state.analysis == null) return;
+    final scannedNames = {for (final food in state.scannedFoods) food.name};
+    final portions = Map<String, int>.from(state.portions)
+      ..removeWhere((name, _) => scannedNames.contains(name));
+    emit(_copyWith(clearAnalysis: true, portions: portions, clearError: true));
+  }
+
   /// Persists the selected foods as a single meal entry. Returns `true` if
   /// saved successfully, `false` otherwise.
   Future<bool> submit() async {
@@ -150,6 +215,9 @@ class AddMealCubit extends Cubit<AddMealState> {
     List<SuggestedFood>? customFoods,
     bool? filterByMealType,
     bool? saving,
+    bool? analyzing,
+    MealAnalysis? analysis,
+    bool clearAnalysis = false,
     String? errorMessage,
     bool clearError = false,
   }) => AddMealState(
@@ -159,6 +227,8 @@ class AddMealCubit extends Cubit<AddMealState> {
     customFoods: customFoods ?? state.customFoods,
     filterByMealType: filterByMealType ?? state.filterByMealType,
     saving: saving ?? state.saving,
+    analyzing: analyzing ?? state.analyzing,
+    analysis: clearAnalysis ? null : (analysis ?? state.analysis),
     errorMessage: clearError ? null : (errorMessage ?? state.errorMessage),
   );
 }

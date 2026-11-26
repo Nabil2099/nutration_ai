@@ -2,31 +2,97 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../data/services/meal_photo_analyzer.dart';
+import '../../data/services/meal_photo_picker.dart';
 import '../cubit/add_meal_cubit.dart';
 import '../cubit/add_meal_state.dart';
 import '../widgets/add_meal_header.dart';
 import '../widgets/add_meal_summary_bar.dart';
 import '../widgets/coach_suggestion_banner.dart';
 import '../widgets/custom_food_dialog.dart';
+import '../widgets/meal_scan_card.dart';
 import '../widgets/meal_search_field.dart';
 import '../widgets/meal_type_selector.dart';
 import '../widgets/suggested_food_card.dart';
 import '../widgets/suggested_food_header.dart';
 
 class AddMealScreen extends StatelessWidget {
-  const AddMealScreen({super.key, this.onSave});
+  const AddMealScreen({
+    super.key,
+    this.onSave,
+    this.photoAnalyzer,
+    this.photoPicker,
+  });
 
   final MealSaver? onSave;
 
+  /// AI analyzer for meal photos; defaults to the Gemini-backed service.
+  final MealPhotoAnalyzerFn? photoAnalyzer;
+
+  /// Camera/gallery picker; defaults to [MealPhotoPicker] (image_picker).
+  final MealPhotoPickerFn? photoPicker;
+
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => AddMealCubit(onSave: onSave),
-    child: const _AddMealView(),
+    create: (_) => AddMealCubit(
+      onSave: onSave,
+      photoAnalyzer: photoAnalyzer ?? MealPhotoAnalyzer().analyze,
+    ),
+    child: _AddMealView(photoPicker: photoPicker ?? const MealPhotoPicker().pick),
   );
 }
 
 class _AddMealView extends StatelessWidget {
-  const _AddMealView();
+  const _AddMealView({required this.photoPicker});
+
+  final MealPhotoPickerFn photoPicker;
+
+  /// Full scan flow: source sheet → capture/select → AI analysis. Errors are
+  /// surfaced as snackbars; cancellation is silent.
+  Future<void> _scanMeal(
+    BuildContext context,
+    AddMealCubit cubit,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    MealPhotoSource? source;
+    try {
+      source = await showMealPhotoSourceSheet(context);
+    } catch (_) {
+      return;
+    }
+    if (source == null || !context.mounted) return;
+    try {
+      final bytes = await photoPicker(source);
+      if (bytes == null || !context.mounted) return;
+      final error = await cubit.analyzePhoto(bytes);
+      if (error != null && context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(error),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } on MealPhotoPickerException catch (e) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Could not open the photo picker. Please try again.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) => BlocBuilder<AddMealCubit, AddMealState>(
@@ -48,12 +114,24 @@ class _AddMealView extends StatelessWidget {
                         delegate: SliverChildListDelegate([
                           const AddMealHeader(),
                           const SizedBox(height: 20),
+                          MealScanCard(
+                            analyzing: state.analyzing,
+                            analysis: state.analysis,
+                            onTapScan: () => _scanMeal(context, cubit),
+                            onClearScan: cubit.clearScan,
+                          ),
+                          const SizedBox(height: 16),
                           MealTypeSelector(
                             selected: state.mealType,
                             onSelected: cubit.selectMealType,
                           ),
                           const SizedBox(height: 16),
-                          MealSearchField(onChanged: cubit.search),
+                          // Keyed on the scan result so a successful analysis
+                          // resets any stale search text along with the query.
+                          MealSearchField(
+                            key: ValueKey(state.analysis),
+                            onChanged: cubit.search,
+                          ),
                           const SizedBox(height: 12),
                           const CoachSuggestionBanner(),
                           const SizedBox(height: 18),

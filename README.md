@@ -9,6 +9,7 @@ A responsive Flutter (Material 3) application for mindful daily nutrition tracki
 - **Daily Calorie Budget**: Compares consumed food calories against the user's daily target (`Remaining = Goal − Consumed`, or `Over Goal` when exceeded). Exercise calories are intentionally excluded from this calculation.
 - **Macronutrient Tracking**: Tracks grams consumed vs. daily targets for **Protein**, **Carbs**, and **Fat**.
 - **7-Day Calorie Trend**: Displays a rolling 7-calendar-day bar chart grouped by local calendar date (`YYYY-MM-DD`), clearly separating logged days, unlogged days (`—`), and partial current-day progress.
+- **Meal Photo Scan**: Snap a photo with the camera or pick one from the gallery inside **Add Meal**; Gemini vision identifies each food, estimates portion weights, calories, and macros, and pre-selects the results in the log so users can review and adjust portions before saving.
 - **Unified Navigation Shell**: Gives authenticated users quick access to **Home**, **Analytics** (Nutrition Trends & Meal History), **AI Coach**, and **Profile**, anchored around a central **`+` (Add Meal)** action that opens a dedicated full-screen logging flow.
 
 > [!NOTE]
